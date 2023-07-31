@@ -56,3 +56,29 @@ jobs:
           echo $ECR_REGISTRY
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
+      - name: Checkout kustomize repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.GITHUB_USERNAME }}/wavving-base
+          ref: main
+          token: ${{ secrets.ACTION_TOKEN }}
+          path: wavving-base
+
+      - name: Update Kubernetes resources
+        run: |
+          echo ${{ steps.login-ecr.outputs.registry }}
+          echo ${{ steps.image-info.outputs.ecr_repository }}
+          echo ${{ steps.image-info.outputs.image_tag }}
+          kustomize edit set image \${{ steps.login-ecr.outputs.registry}}/${{ steps.image-info.outputs.ecr_repository }}=${{ steps.login-ecr.outputs.registry}}/${{ steps.image-info.outputs.ecr_repository }}:${{ steps.image-info.outputs.image_tag }}
+
+      - name: Commit files
+        run: |
+          git config —global user.email "kodahee@github.com"
+          git config —global user.name "kodahee"
+          git add .
+          git commit -am "Update image tag"
+          git push -u origin main -f
