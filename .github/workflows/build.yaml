@@ -48,7 +48,7 @@ jobs:
         id: image-info
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: prod-repo
+          ECR_REPOSITORY: wavving
           IMAGE_TAG: ${{ steps.image.outputs.version }}
         run: |
           echo "name=ecr_repository::$ECR_REPOSITORY" >> $GITHUB_OUTPUT
