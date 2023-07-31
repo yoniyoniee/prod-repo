@@ -3,10 +3,13 @@ name: Build Front
 on:
   push:
     branches: [ main ]         # branch 주의
-
+permissions:
+    contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_USERNAME: yoniyoniee
     steps:
 
       - name: Configure AWS CLI profile
@@ -14,7 +17,6 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ap-northeast-2
-
 
       - name: Checkout source code
         uses: actions/checkout@v2
@@ -35,22 +37,22 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Get image tag(verion)
+      - name: Get image tag(version)
         id: image
         run: |
           VERSION=$(echo ${{ github.sha }} | cut -c1-8)
           echo VERSION=$VERSION
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push image to Amazon ECR
         id: image-info
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: wavving
+          ECR_REPOSITORY: prod-repo
           IMAGE_TAG: ${{ steps.image.outputs.version }}
         run: |
-          echo "name=ecr_repository::\$ECR_REPOSITORY" >> $GITHUB_OUTPUT
-          echo "name=image_tag::\$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "name=ecr_repository::$ECR_REPOSITORY" >> $GITHUB_OUTPUT
+          echo "name=image_tag::$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo $ECR_REGISTRY
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
