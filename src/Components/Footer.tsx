@@ -6,7 +6,7 @@ const FootWrapper = styled.div`
   justify-content: center;
   background-color: #000000;
   font-size: 100px;
-  color: #6e7781;
+  color: #ffffff;
   width: 100%;
   height: 100%;
 `;
@@ -26,7 +26,7 @@ const GitHub = styled.svg`
   height: 18px;
   vertical-align: middle;
   margin-right: 5px;
-  fill: #6e7781;
+  fill: #ffffff;
   cursor: pointer;
 `;
 
