@@ -77,8 +77,8 @@ jobs:
 
       - name: Commit files
         run: |
-          git config -—global user.email "kodahee@github.com"
-          git config -—global user.name "kodahee"
+          git config --global user.email "kodahee@github.com"
+          git config --global user.name "kodahee"
           git add .
           git commit -am "Update image tag"
           git push -u origin main -f
