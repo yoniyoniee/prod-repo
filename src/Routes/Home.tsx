@@ -384,7 +384,7 @@ function Home() {
   return (
     <Wrapper>
       {isLoading ? (
-        <Loader>Loading...</Loader>
+        <Loader>로딩중...</Loader>
       ) : (
         <>
           <Banner bgphoto={makeBgPath(data![0].id)}>
