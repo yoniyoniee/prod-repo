@@ -63,7 +63,7 @@ jobs:
       - name: Checkout kustomize repository
         uses: actions/checkout@v2
         with:
-          repository: ${{ env.GITHUB_USERNAME }}/wavving-base
+          repository: ${{ env.GITHUB_USERNAME }}/prod-manifests-repo
           ref: main
           token: ${{ secrets.ACTION_TOKEN }}
           path: wavving-base
