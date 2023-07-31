@@ -1,0 +1,56 @@
+name: Build Front
+
+on:
+  push:
+    branches: [ main ]         # branch 주의
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Configure AWS CLI profile
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ap-northeast-2
+
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Check Node v
+        run: node -v
+
+      - name: Build front
+        env:
+          CI: false
+        run: |
+          echo "export const pool_id = \"${{ secrets.AWS_POOL_KEY }}\"" >> src/pool_key.ts
+          cat src/pool_key.ts
+          npm install --force
+          npm run build
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get image tag(verion)
+        id: image
+        run: |
+          VERSION=$(echo ${{ github.sha }} | cut -c1-8)
+          echo VERSION=$VERSION
+          echo "::set-output name=version::$VERSION"
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: image-info
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: wavving
+          IMAGE_TAG: ${{ steps.image.outputs.version }}
+        run: |
+          echo "name=ecr_repository::\$ECR_REPOSITORY" >> $GITHUB_OUTPUT
+          echo "name=image_tag::\$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
